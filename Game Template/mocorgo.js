@@ -777,9 +777,7 @@ function collide(o1, o2){
 
 function userInteraction(){
     BODIES.forEach((b) => {
-        if(b.player){
-            b.keyControl();
-        }
+        b.keyControl();
     })
 }
 
@@ -825,10 +823,6 @@ function mainLoop(){
 }
 
 function renderOnly(){
-    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-    BODIES.forEach((b) => {
-        b.render();
-    })
+    renderLoop();
     requestAnimationFrame(renderOnly);
 }
-
