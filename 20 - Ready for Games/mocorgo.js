@@ -365,8 +365,9 @@ class Capsule extends Body{
 
     setPosition(x, y, a = this.angle){
         this.pos.set(x, y);
+        this.angle = a;
         this.comp[0].pos = this.pos;
-        this.comp[0].getVertices(a + this.angVel);
+        this.comp[0].getVertices(this.angle + this.angVel);
         this.comp[1].pos = this.comp[0].pos.add(this.comp[0].dir.mult(-this.comp[0].length/2));
         this.comp[2].pos = this.comp[0].pos.add(this.comp[0].dir.mult(this.comp[0].length/2));
         this.angle += this.angVel;
@@ -417,8 +418,9 @@ class Box extends Body{
 
     setPosition(x, y, a = this.angle){
         this.pos.set(x, y);
+        this.angle = a;
         this.comp[0].pos = this.pos;
-        this.comp[0].getVertices(a + this.angVel);
+        this.comp[0].getVertices(this.angle + this.angVel);
         this.angle += this.angVel;
     }
 
@@ -479,10 +481,11 @@ class Star extends Body{
 
     setPosition(x, y, a = this.angle){
         this.pos.set(x, y);
+        this.angle = a;
         this.comp[0].pos = this.pos;
         this.comp[1].pos = this.pos;
-        this.comp[0].getVertices(a + this.angVel);
-        this.comp[1].getVertices(a + this.angVel);
+        this.comp[0].getVertices(this.angle + this.angVel);
+        this.comp[1].getVertices(this.angle + this.angVel);
         this.angle += this.angVel;
     }
 
