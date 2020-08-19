@@ -810,18 +810,22 @@ function physicsLoop(timestamp) {
     });
 }
 
+//If anything else (text, data...) needs to be rendered on the canvas
+function userInterface(){};
+
 function renderLoop(){
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     BODIES.forEach((b) => {
         b.render();
     })
+    userInterface();
 }
 
 function mainLoop(){
     userInteraction();
-    gameLogic();
     physicsLoop();
     renderLoop();
+    gameLogic();
     requestAnimationFrame(mainLoop);
 }
 
