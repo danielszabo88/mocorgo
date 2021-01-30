@@ -146,7 +146,7 @@ class Rectangle{
         this.length = this.vertex[1].subtr(this.vertex[0]).mag();
         this.width = w;
         this.vertex[2] = this.vertex[1].add(this.dir.normal().mult(this.width));
-        this.vertex[3] = this.vertex[2].add(this.dir.normal().mult(-this.length));
+        this.vertex[3] = this.vertex[2].add(this.dir.mult(-this.length));
         this.pos = this.vertex[0].add(this.dir.mult(this.length/2)).add(this.dir.normal().mult(this.width/2));
         this.angle = 0;
         this.rotMat = new Matrix(2,2);
