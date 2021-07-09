@@ -302,23 +302,19 @@ class Ball extends Body{
     }
 
     keyControl(){
+        this.acc.x = 0
+        this.acc.y = 0
         if(this.left){
-            this.acc.x = -this.keyForce;
+            this.acc.x -= this.keyForce;
         }
         if(this.up){
-            this.acc.y = -this.keyForce;
+            this.acc.y -= this.keyForce;
         }
         if(this.right){
-            this.acc.x = this.keyForce;
+            this.acc.x += this.keyForce;
         }
         if(this.down){
-            this.acc.y = this.keyForce;
-        }
-        if(!this.left && !this.right){
-            this.acc.x = 0;
-        }
-        if(!this.up && !this.down){
-            this.acc.y = 0;
+            this.acc.y += this.keyForce;
         }
     }
 }
@@ -750,6 +746,17 @@ function setBallVerticesAlongAxis(obj, axis){
 }
 //Thats it for the SAT and its support functions
 
+//Collision is handled based on the body layer
+//Layer -1: collision handling with layer 0 bodies ONLY
+//Layer -2: no collision handling with any other body
+function collisionHandlingCondition(body1, body2){
+    return (
+        (body1.layer === body2.layer && !(body1.layer === -1 || body1.layer === -2)) ||
+        (body1.layer === 0 && body2.layer !== -2) || 
+        (body2.layer === 0 && body1.layer !== -2) 
+    )
+}
+
 //Prevents objects to float away from the canvas
 function putWallsAround(x1, y1, x2, y2){
     let edge1 = new Wall(x1, y1, x2, y1);
@@ -795,12 +802,12 @@ function physicsLoop(timestamp) {
     
     BODIES.forEach((b, index) => {
         for(let bodyPair = index+1; bodyPair < BODIES.length; bodyPair++){
-           if((BODIES[index].layer === BODIES[bodyPair].layer ||
-               BODIES[index].layer === 0 || BODIES[bodyPair].layer === 0) && 
-               collide(BODIES[index], BODIES[bodyPair])){
-                    let bestSat = collide(BODIES[index], BODIES[bodyPair]);
+           if(collisionHandlingCondition(BODIES[index], BODIES[bodyPair])){               
+                let bestSat = collide(BODIES[index], BODIES[bodyPair]);
+                if(bestSat){
                     COLLISIONS.push(new CollData(BODIES[index], BODIES[bodyPair], bestSat.axis, bestSat.pen, bestSat.vertex));
-           }
+                }           
+            }
         }
     });
 
