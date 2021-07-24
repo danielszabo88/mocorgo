@@ -90,6 +90,7 @@ class Matrix{
 //classes storing the primitive shapes: Line, Circle, Rectangle, Triangle
 class Line{
     constructor(x0, y0, x1, y1){
+        this.color = ""
         this.vertex = [];
         this.vertex[0] = new Vector(x0, y0);
         this.vertex[1] = new Vector(x1, y1);
@@ -98,15 +99,15 @@ class Line{
         this.pos = new Vector((this.vertex[0].x+this.vertex[1].x)/2, (this.vertex[0].y+this.vertex[1].y)/2);
     }
 
-    draw(color){
+    draw(){
         ctx.beginPath();
         ctx.moveTo(this.vertex[0].x, this.vertex[0].y);
         ctx.lineTo(this.vertex[1].x, this.vertex[1].y);
-        if (color === ""){
+        if (this.color === ""){
             ctx.strokeStyle = "black";
             ctx.stroke();
         } else {
-            ctx.strokeStyle = color;
+            ctx.strokeStyle = this.color;
             ctx.stroke();
         }
         ctx.strokeStyle = "";
@@ -116,19 +117,20 @@ class Line{
 
 class Circle{
     constructor(x, y, r){
+        this.color = ""
         this.vertex = [];
         this.pos = new Vector(x, y);
         this.r = r;
     }
 
-    draw(color){
+    draw(){
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.r, 0, 2*Math.PI);
-        if (color === ""){
+        if (this.color === ""){
             ctx.strokeStyle = "black";
             ctx.stroke();
         } else {
-            ctx.fillStyle = color;
+            ctx.fillStyle = this.color;
             ctx.fill();
         }
         ctx.fillStyle = "";
@@ -138,6 +140,7 @@ class Circle{
 
 class Rectangle{
     constructor(x1, y1, x2, y2, w){
+        this.color = ""
         this.vertex = [];
         this.vertex[0] = new Vector(x1, y1);
         this.vertex[1] = new Vector(x2, y2);
@@ -152,18 +155,18 @@ class Rectangle{
         this.rotMat = new Matrix(2,2);
     }
 
-    draw(color){
+    draw(){
         ctx.beginPath();
         ctx.moveTo(this.vertex[0].x, this.vertex[0].y);
         ctx.lineTo(this.vertex[1].x, this.vertex[1].y);
         ctx.lineTo(this.vertex[2].x, this.vertex[2].y);
         ctx.lineTo(this.vertex[3].x, this.vertex[3].y);
         ctx.lineTo(this.vertex[0].x, this.vertex[0].y);
-        if (color === ""){
+        if (this.color === ""){
             ctx.strokeStyle = "black";
             ctx.stroke();
         } else {
-            ctx.fillStyle = color;
+            ctx.fillStyle = this.color;
             ctx.fill();
         }
         ctx.fillStyle = "";
@@ -182,6 +185,7 @@ class Rectangle{
 
 class Triangle{
     constructor(x1, y1, x2, y2, x3, y3){
+        this.color = ""
         this.vertex = [];
         this.vertex[0] = new Vector(x1, y1);
         this.vertex[1] = new Vector(x2, y2);
@@ -197,17 +201,17 @@ class Triangle{
         this.rotMat = new Matrix(2,2);
     }
 
-    draw(color){
+    draw(){
         ctx.beginPath();
         ctx.moveTo(this.vertex[0].x, this.vertex[0].y);
         ctx.lineTo(this.vertex[1].x, this.vertex[1].y);
         ctx.lineTo(this.vertex[2].x, this.vertex[2].y);
         ctx.lineTo(this.vertex[0].x, this.vertex[0].y);
-        if (color === ""){
+        if (this.color === ""){
             ctx.strokeStyle = "black";
             ctx.stroke();
         } else {
-            ctx.fillStyle = color;
+            ctx.fillStyle = this.color;
             ctx.fill();
         }
         ctx.fillStyle = "";
@@ -237,7 +241,6 @@ class Body{
         this.friction = 0;
         this.angFriction = 0;
         this.maxSpeed = 0;
-        this.color = "";
         this.layer = 0;
 
         this.up = false;
@@ -258,7 +261,7 @@ class Body{
 
     render(){
         for (let i in this.comp){
-            this.comp[i].draw(this.color);
+            this.comp[i].draw();
         }
     }
     reposition(){
@@ -271,6 +274,11 @@ class Body{
         this.angVel *= (1-this.angFriction);
     }
     keyControl(){}
+    setColor(color){
+        this.comp.forEach(comp => {
+            comp.color = color
+        })
+    }
     remove(){
         if (BODIES.indexOf(this) !== -1){
             BODIES.splice(BODIES.indexOf(this), 1);
@@ -494,7 +502,10 @@ class Star extends Body{
 class Wall extends Body{
     constructor(x1, y1, x2, y2){
         super();
+        this.start = new Vector(x1, y1);
+        this.end = new Vector(x2, y2);
         this.comp = [new Line(x1, y1, x2, y2)];
+        this.dir = this.end.subtr(this.start).unit();
         this.pos = new Vector((x1+x2)/2, (y1+y2)/2);
     }
 }
@@ -565,8 +576,12 @@ function testCircle(x, y, color="black"){
     ctx.closePath();
 }
 
+// Takes a vector and a line
+// Returns with the vector of the lines closest point to the given vector
 function closestPointOnLS(p, w1){
     let ballToWallStart = w1.start.subtr(p);
+    console.log(w1.dir)
+    console.log(ballToWallStart)
     if(Vector.dot(w1.dir, ballToWallStart) > 0){
         return w1.start;
     }
@@ -579,6 +594,42 @@ function closestPointOnLS(p, w1){
     let closestDist = Vector.dot(w1.dir, ballToWallStart);
     let closestVect = w1.dir.mult(closestDist);
     return w1.start.subtr(closestVect);
+}
+
+// Takes 2 endpoints of 2 line segments (aka 4 vectors)
+// Returns with the intersection vector or false if there is no intersection
+function lineSegmentIntersection(p1,p2,q1,q2){
+    let resultVector = new Vector(0,0)
+    let r = p2.subtr(p1)
+    let s = q2.subtr(q1)
+    let qp = q1.subtr(p1)
+    let denom = Vector.cross(r,s)
+    
+    let u = Vector.cross(qp,r) / denom;
+    let t = Vector.cross(qp,s) / denom;
+
+    // Case 1: two line segments are parallel and non-intersecting
+    if(denom === 0 && Vector.cross(qp,r) !== 0){
+        return false
+    }
+    // Case 2: two line segments are collinear
+    if(denom === 0 && Vector.cross(qp,r) === 0){
+        // True: overlapping, false: disjoint
+        if(((q1.x-p1.x < 0)&&(q1.x-p2.x < 0)&&(q2.x-p1.x < 0)&&(q2.x-p2.x < 0)) &&
+            ((q1.y-p1.y < 0)&&(q1.y-p2.y < 0)&&(q2.y-p1.y < 0)&&(q2.y-p2.y < 0))){
+            return false
+        } else {
+            resultVector = p2   // fix...
+            return resultVector
+        }
+    }
+    // Case 3: If 0<=t<=1 and 0<=u<=1, they have an intersection, otherwise nope
+    if((t >= 0) && (t <= 1) && (u >= 0) && (u <= 1)){
+        resultVector = p1.add(r.mult(t))
+        return resultVector
+    } else {
+        return false
+    }     
 }
 
 //Separating axis theorem on two objects
