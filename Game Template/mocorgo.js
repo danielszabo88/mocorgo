@@ -580,8 +580,6 @@ function testCircle(x, y, color="black"){
 // Returns with the vector of the lines closest point to the given vector
 function closestPointOnLS(p, w1){
     let ballToWallStart = w1.start.subtr(p);
-    console.log(w1.dir)
-    console.log(ballToWallStart)
     if(Vector.dot(w1.dir, ballToWallStart) > 0){
         return w1.start;
     }
