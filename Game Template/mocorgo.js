@@ -103,7 +103,7 @@ class Line{
         ctx.beginPath();
         ctx.moveTo(this.vertex[0].x, this.vertex[0].y);
         ctx.lineTo(this.vertex[1].x, this.vertex[1].y);
-        if (this.color === ""){
+        if (!this.color){
             ctx.strokeStyle = "black";
             ctx.stroke();
         } else {
@@ -126,7 +126,7 @@ class Circle{
     draw(){
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.r, 0, 2*Math.PI);
-        if (this.color === ""){
+        if (!this.color){
             ctx.strokeStyle = "black";
             ctx.stroke();
         } else {
@@ -162,7 +162,7 @@ class Rectangle{
         ctx.lineTo(this.vertex[2].x, this.vertex[2].y);
         ctx.lineTo(this.vertex[3].x, this.vertex[3].y);
         ctx.lineTo(this.vertex[0].x, this.vertex[0].y);
-        if (this.color === ""){
+        if (!this.color){
             ctx.strokeStyle = "black";
             ctx.stroke();
         } else {
@@ -207,7 +207,7 @@ class Triangle{
         ctx.lineTo(this.vertex[1].x, this.vertex[1].y);
         ctx.lineTo(this.vertex[2].x, this.vertex[2].y);
         ctx.lineTo(this.vertex[0].x, this.vertex[0].y);
-        if (this.color === ""){
+        if (!this.color){
             ctx.strokeStyle = "black";
             ctx.stroke();
         } else {
@@ -242,6 +242,7 @@ class Body{
         this.angFriction = 0;
         this.maxSpeed = 0;
         this.layer = 0;
+        this.color = "";
 
         this.up = false;
         this.down = false;
@@ -260,6 +261,9 @@ class Body{
     }
 
     render(){
+        if(this.color){
+            this.setColor(this.color)
+        }
         for (let i in this.comp){
             this.comp[i].draw();
         }
@@ -509,6 +513,8 @@ class Wall extends Body{
         this.pos = new Vector((x1+x2)/2, (y1+y2)/2);
     }
 }
+
+let targe
 
 //Collision manifold, consisting the data for collision handling
 //Manifolds are collected in an array for every frame
