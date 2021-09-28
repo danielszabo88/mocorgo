@@ -514,8 +514,6 @@ class Wall extends Body{
     }
 }
 
-let targe
-
 //Collision manifold, consisting the data for collision handling
 //Manifolds are collected in an array for every frame
 class CollData{
